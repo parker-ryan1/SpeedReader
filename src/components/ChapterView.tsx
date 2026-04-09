@@ -23,6 +23,11 @@ export default function ChapterView({
   const [selectedChapter, setSelectedChapter] = useState(0)
   const [viewPage, setViewPage] = useState(0)
   const [hoveredWord, setHoveredWord] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<number[]>([])
+  const [searchResultIdx, setSearchResultIdx] = useState(0)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const wordRefs = useRef<Map<number, HTMLSpanElement>>(new Map())
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -37,7 +42,77 @@ export default function ChapterView({
   const pageEnd = Math.min(pageStart + WORDS_PER_PAGE, chapterWords.length)
   const pageWords = chapterWords.slice(pageStart, pageEnd)
 
-  // Scroll current word into view when chapter changes
+  // Ctrl+F to open search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault()
+        setSearchOpen(true)
+        setTimeout(() => searchInputRef.current?.focus(), 50)
+      }
+      if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setSearchQuery('')
+        setSearchResults([])
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  // Focus input when opened
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 50)
+    }
+  }, [searchOpen])
+
+  // Run search across entire document when query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      setSearchResultIdx(0)
+      return
+    }
+    const q = searchQuery.toLowerCase()
+    const matches: number[] = []
+    for (let i = 0; i < words.length; i++) {
+      if (words[i].toLowerCase().includes(q)) {
+        matches.push(i)
+      }
+    }
+    setSearchResults(matches)
+    setSearchResultIdx(0)
+  }, [searchQuery, words])
+
+  // Jump to current search result: switch chapter + page then scroll
+  useEffect(() => {
+    if (searchResults.length === 0) return
+    const absIdx = searchResults[searchResultIdx]
+
+    // Find which chapter this word belongs to
+    let targetChapter = 0
+    for (let i = chapters.length - 1; i >= 0; i--) {
+      if (absIdx >= chapters[i].startWordIndex) {
+        targetChapter = i
+        break
+      }
+    }
+    const tChapterStart = chapters[targetChapter].startWordIndex
+    const offsetInChapter = absIdx - tChapterStart
+    const targetPage = Math.floor(offsetInChapter / WORDS_PER_PAGE)
+
+    setSelectedChapter(targetChapter)
+    setViewPage(targetPage)
+
+    // Scroll after render
+    setTimeout(() => {
+      const el = wordRefs.current.get(absIdx)
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }, 80)
+  }, [searchResults, searchResultIdx, chapters])
+
+  // Scroll current word into view when chapter/page changes (non-search)
   useEffect(() => {
     const el = wordRefs.current.get(currentWordIndex)
     if (el) {
@@ -55,6 +130,11 @@ export default function ChapterView({
   const handleChapterSelect = (idx: number) => {
     setSelectedChapter(idx)
     setViewPage(0)
+  }
+
+  const goToSearchResult = (delta: number) => {
+    if (searchResults.length === 0) return
+    setSearchResultIdx((i) => (i + delta + searchResults.length) % searchResults.length)
   }
 
   return (
@@ -88,12 +168,71 @@ export default function ChapterView({
       <div className="chapter-main">
         <div className="chapter-main-header">
           <h2>{chapter?.title ?? 'Document'}</h2>
-          <div className="chapter-stats">
-            <span>{chapterWords.length} words</span>
-            <span>·</span>
-            <span>~{Math.round(chapterWords.length / 250)} min read</span>
+          <div className="chapter-header-right">
+            <div className="chapter-stats">
+              <span>{chapterWords.length} words</span>
+              <span>·</span>
+              <span>~{Math.round(chapterWords.length / 250)} min read</span>
+            </div>
+            <button
+              className={`search-toggle-btn ${searchOpen ? 'active' : ''}`}
+              onClick={() => {
+                setSearchOpen((o) => !o)
+                setSearchQuery('')
+                setSearchResults([])
+              }}
+              title="Find word (Ctrl+F)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Find
+            </button>
           </div>
         </div>
+
+        {/* Search bar */}
+        {searchOpen && (
+          <div className="search-bar">
+            <div className="search-input-wrap">
+              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                className="search-input"
+                type="text"
+                placeholder="Search words across document..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') goToSearchResult(e.shiftKey ? -1 : 1)
+                  if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); setSearchResults([]) }
+                }}
+              />
+              {searchQuery && (
+                <span className="search-count">
+                  {searchResults.length === 0
+                    ? 'No results'
+                    : `${searchResultIdx + 1} / ${searchResults.length}`}
+                </span>
+              )}
+            </div>
+            <div className="search-nav">
+              <button className="search-nav-btn" onClick={() => goToSearchResult(-1)} disabled={searchResults.length === 0} title="Previous (Shift+Enter)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+              </button>
+              <button className="search-nav-btn" onClick={() => goToSearchResult(1)} disabled={searchResults.length === 0} title="Next (Enter)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+              </button>
+              <button className="search-nav-btn search-close-btn" onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]) }} title="Close (Esc)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="chapter-hint">
           Click any word to start reading from that point
@@ -105,6 +244,8 @@ export default function ChapterView({
               const absoluteIndex = chapterStart + pageStart + i
               const isCurrent = absoluteIndex === currentWordIndex
               const isHovered = hoveredWord === absoluteIndex
+              const isSearchMatch = searchResults.includes(absoluteIndex)
+              const isActiveMatch = searchResults[searchResultIdx] === absoluteIndex
 
               return (
                 <span
@@ -113,7 +254,7 @@ export default function ChapterView({
                     if (el) wordRefs.current.set(absoluteIndex, el)
                     else wordRefs.current.delete(absoluteIndex)
                   }}
-                  className={`word-token ${isCurrent ? 'current' : ''} ${isHovered ? 'hovered' : ''}`}
+                  className={`word-token ${isCurrent ? 'current' : ''} ${isHovered ? 'hovered' : ''} ${isSearchMatch ? 'search-match' : ''} ${isActiveMatch ? 'search-active' : ''}`}
                   onClick={() => handleWordClick(absoluteIndex)}
                   onMouseEnter={() => setHoveredWord(absoluteIndex)}
                   onMouseLeave={() => setHoveredWord(null)}
