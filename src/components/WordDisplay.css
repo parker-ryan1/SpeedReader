@@ -33,15 +33,13 @@
   z-index: 1;
 }
 
-/* Top half: from top of wrapper down to just above center */
+/* Top half: bottom edge set inline via lineGap prop */
 .guide-line.top {
   top: 0;
-  bottom: calc(50% + 2em);
 }
 
-/* Bottom half: from just below center to bottom of wrapper */
+/* Bottom half: top edge set inline via lineGap prop */
 .guide-line.bottom {
-  top: calc(50% + 2em);
   bottom: 0;
 }
 

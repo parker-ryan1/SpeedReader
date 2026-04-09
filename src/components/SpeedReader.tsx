@@ -198,6 +198,7 @@ export default function SpeedReader({
           word={currentWord}
           fontSize={settings.fontSize}
           fontFamily={settings.fontFamily}
+          lineGap={settings.lineGap}
         />
 
         {/* Word counter */}

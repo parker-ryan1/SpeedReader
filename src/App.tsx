@@ -12,7 +12,8 @@ export interface ReaderSettings {
   fontSize: number
   fontFamily: string
   theme: 'dark' | 'light' | 'sepia'
-  punctuationPause: number  // multiplier: 1 = no pause, 2 = double delay, etc.
+  punctuationPause: number
+  lineGap: number  // em units: gap on each side of the pivot letter
 }
 
 const DEFAULT_SETTINGS: ReaderSettings = {
@@ -21,6 +22,7 @@ const DEFAULT_SETTINGS: ReaderSettings = {
   fontFamily: 'Georgia, serif',
   theme: 'dark',
   punctuationPause: 2.0,
+  lineGap: 1.1,
 }
 
 export default function App() {

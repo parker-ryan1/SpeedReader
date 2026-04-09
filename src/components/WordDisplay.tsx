@@ -4,6 +4,7 @@ interface Props {
   word: string
   fontSize: number
   fontFamily: string
+  lineGap: number
 }
 
 function getOptimalLetterIndex(word: string): number {
@@ -26,14 +27,15 @@ function splitWord(word: string): { before: string; pivot: string; after: string
   }
 }
 
-export default function WordDisplay({ word, fontSize, fontFamily }: Props) {
+export default function WordDisplay({ word, fontSize, fontFamily, lineGap }: Props) {
   const { before, pivot, after } = splitWord(word)
+  const gapValue = `calc(50% + ${lineGap}em)`
 
   return (
     <div className="word-display-wrapper">
       {/* Single vertical line split by the pivot letter: top half + bottom half */}
-      <div className="guide-line top" />
-      <div className="guide-line bottom" />
+      <div className="guide-line top" style={{ bottom: gapValue }} />
+      <div className="guide-line bottom" style={{ top: gapValue }} />
 
       {/* The word */}
       <div

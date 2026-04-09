@@ -85,6 +85,28 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }: P
             </div>
           </div>
 
+          {/* Focus Line Gap */}
+          <div className="setting-group">
+            <label className="setting-label">
+              Focus Line Gap
+              <span className="setting-value">{settings.lineGap.toFixed(1)}em</span>
+            </label>
+            <div className="slider-row">
+              <span className="range-min">0.3</span>
+              <input
+                type="range"
+                min={0.3}
+                max={3.0}
+                step={0.1}
+                value={settings.lineGap}
+                onChange={(e) => update({ lineGap: parseFloat(e.target.value) })}
+                className="setting-slider"
+              />
+              <span className="range-max">3.0</span>
+            </div>
+            <p className="setting-hint">Controls the gap in the red vertical line around the focus letter.</p>
+          </div>
+
           {/* Punctuation Pause */}
           <div className="setting-group">
             <label className="setting-label">
