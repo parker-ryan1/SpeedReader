@@ -1,0 +1,202 @@
+.control-bar {
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 24px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Progress row */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: center;
+}
+
+.slider-track {
+  flex: 1;
+  position: relative;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: width 0.05s linear;
+}
+
+.progress-slider {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 20px;
+  margin: 0;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent);
+  transition: transform 0.1s ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.progress-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+/* Buttons row */
+.buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  border: 1px solid var(--border);
+}
+
+.ctrl-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* WPM group */
+.wpm-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wpm-btn {
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 40px;
+}
+
+.wpm-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+  padding: 4px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.wpm-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.wpm-unit {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Play button */
+.play-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.4);
+  transition: all 0.15s ease;
+}
+
+.play-btn:hover {
+  background: var(--accent2);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5);
+}
+
+.play-btn.playing {
+  background: var(--accent);
+}
+
+.play-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Skip group */
+.skip-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skip-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.skip-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Keyboard hint */
+.keyboard-hint {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+  letter-spacing: 0.3px;
+}

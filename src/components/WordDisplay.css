@@ -1,0 +1,74 @@
+.word-display-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 40px 0;
+}
+
+/* Horizontal line across the full width */
+.word-display-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border);
+  opacity: 0.4;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.guide-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: var(--accent);
+  opacity: 0.85;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Top half: from top of wrapper down to just above center */
+.guide-line.top {
+  top: 0;
+  bottom: calc(50% + 2em);
+}
+
+/* Bottom half: from just below center to bottom of wrapper */
+.guide-line.bottom {
+  top: calc(50% + 2em);
+  bottom: 0;
+}
+
+.word-display {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  user-select: none;
+  /* Ensure pivot letter aligns to center */
+}
+
+.word-before {
+  color: var(--text);
+  text-align: right;
+}
+
+.word-pivot {
+  color: var(--accent);
+  font-weight: 700;
+  position: relative;
+}
+
+.word-after {
+  color: var(--text);
+  text-align: left;
+}
