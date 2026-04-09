@@ -55,13 +55,27 @@ export async function parsePdf(file: File): Promise<ParsedPdf> {
     allWords.push(...pageWords)
   }
 
-  // Build chapters from outline if available
+  // Build chapters from outline if available, resolving dest → page → word index
   if (outline.length > 0) {
     for (let i = 0; i < outline.length; i++) {
       const item = outline[i]
+      let wordIndex = 0
+      try {
+        let dest = item.dest
+        if (typeof dest === 'string') {
+          dest = await pdf.getDestination(dest)
+        }
+        if (Array.isArray(dest) && dest[0]) {
+          const pageIndex = await pdf.getPageIndex(dest[0] as Parameters<typeof pdf.getPageIndex>[0])
+          // pageBreaks[n] = word index where page n+2 starts (0-based page index)
+          wordIndex = pageIndex === 0 ? 0 : (pageBreaks[pageIndex - 1] ?? 0)
+        }
+      } catch {
+        // leave wordIndex as 0
+      }
       chapters.push({
         title: item.title || `Chapter ${i + 1}`,
-        startWordIndex: 0,
+        startWordIndex: wordIndex,
         pageNumber: i + 1,
       })
     }
